@@ -5,15 +5,20 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true
   },
   email: {
     type: String,
     required: true,
     unique: true,
+    trim: true,
+    match: [/.+\@.+\..+/, 'Ange en giltig e-postadress']
   },
   password: {
     type: String,
     required: true,
+    trim: true,
+    minlength: 6
   }
 }, {
   timestamps: true,
@@ -21,6 +26,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
+  console.log('🔐 Hashing password for:', this.email);
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();

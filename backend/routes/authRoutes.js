@@ -4,8 +4,8 @@ import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+const generateToken = (user) => {
+  return jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
   res.status(201).json({
     _id: user._id,
     email: user.email,
-    token: generateToken(user._id),
+    token: generateToken(user),
   });
 });
 
@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
   res.json({
     _id: user._id,
     email: user.email,
-    token: generateToken(user._id),
+    token: generateToken(user),
   });
 });
 

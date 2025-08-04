@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { ChevronRight, ChevronLeft, RotateCcw, Trophy, Brain, Target, BookOpen, Clock, Award, CheckCircle, XCircle, Star } from 'lucide-react';
 
 const QuizApp = () => {
@@ -10,6 +11,37 @@ const QuizApp = () => {
   const [startTime, setStartTime] = useState(Date.now());
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showDetailedResults, setShowDetailedResults] = useState(false); // ✅ Rätt plats
+  const { token } = useAuth();
+
+  useEffect(() => {
+    if (!showResults || !token) return;
+    const score = calculateScore();
+    const saveResult = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/results', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            score: score.totalScore,
+            maxScore: score.maxScore,
+            percentage: score.percentage,
+            timeSpent,
+            correctAnswers: score.correctAnswers,
+            totalQuestions: score.totalQuestions,
+            detailed: [] // Lägg till detaljer senare om önskas
+          })
+        });
+        const data = await response.json();
+        console.log('✅ Resultat sparat:', data);
+      } catch (error) {
+        console.error('❌ Kunde inte spara resultat:', error);
+      }
+    };
+    saveResult();
+  }, [showResults, token]);
 
   // Quiz data structure
   const quizData = [
@@ -360,7 +392,6 @@ const QuizApp = () => {
   
       return { isCorrect, earnedPoints, userAnswer };
     };
-  
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
@@ -792,6 +823,7 @@ const QuizApp = () => {
       </div>
   );
 };
+
 
 export default QuizApp;
 
