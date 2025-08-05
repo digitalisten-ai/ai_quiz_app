@@ -12,24 +12,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check route
-app.get('/', (req, res) => {
-  res.json({ message: '✅ This is the ACTIVE server instance!' });
-});
-
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.log('❌ MongoDB connection error:', err));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/results', resultRoutes);
-
-// Fallback for unknown routes
-app.use((req, res, next) => {
-  res.status(404);
-  res.type('application/json');
-  res.json({ message: 'Endpoint not found' });
-});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

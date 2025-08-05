@@ -9,11 +9,7 @@ const router = express.Router();
 // @access Private
 router.post('/', protect, async (req, res) => {
   const { score, maxScore, percentage, timeSpent, correctAnswers, totalQuestions } = req.body;
-  if (!req.body || typeof req.body !== 'object') {
-    return res.status(400).json({ message: 'Felaktigt dataformat' });
-  }
-
-  if (score === undefined || maxScore === undefined || percentage === undefined) {
+  if (!score || !maxScore || !percentage) {
     return res.status(400).json({ message: 'Alla nödvändiga fält måste vara ifyllda' });
   }
   try {
@@ -31,7 +27,6 @@ router.post('/', protect, async (req, res) => {
     res.status(201).json(result);
   } catch (error) {
     console.error('❌ Error saving result:', error);
-    console.error('User ID:', req.user?._id);
     console.error('Request body:', req.body);
     res.status(500).json({ message: 'Fel vid sparande av resultat' });
   }

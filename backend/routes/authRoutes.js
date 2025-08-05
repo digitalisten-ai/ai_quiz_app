@@ -12,33 +12,49 @@ const generateToken = (user) => {
 
 // Registrera användare
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-  const userExists = await User.findOne({ email });
-  if (userExists) return res.status(400).json({ message: 'Användaren finns redan' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Alla fält måste fyllas i' });
+    }
 
-  const user = await User.create({ name, email, password });
-  res.status(201).json({
-    _id: user._id,
-    email: user.email,
-    token: generateToken(user),
-  });
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: 'Användaren finns redan' });
+
+    const user = await User.create({ name, email, password });
+    res.status(201).json({
+      _id: user._id,
+      email: user.email,
+      token: generateToken(user),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Serverfel vid registrering' });
+  }
 });
 
 // Logga in
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user || !(await user.matchPassword(password))) {
-    return res.status(401).json({ message: 'Fel e-post eller lösenord' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'E-post och lösenord krävs' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user || !(await user.matchPassword(password))) {
+      return res.status(401).json({ message: 'Fel e-post eller lösenord' });
+    }
+
+    res.json({
+      _id: user._id,
+      email: user.email,
+      token: generateToken(user),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Serverfel vid inloggning' });
   }
-
-  res.json({
-    _id: user._id,
-    email: user.email,
-    token: generateToken(user),
-  });
 });
 
 export default router;
