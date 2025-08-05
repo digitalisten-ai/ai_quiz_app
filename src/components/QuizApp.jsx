@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, RotateCcw, Trophy, Brain, Target, BookOpen, Clock, Award, CheckCircle, XCircle, Star } from 'lucide-react';
 
 const QuizApp = () => {
@@ -12,6 +13,13 @@ const QuizApp = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showDetailedResults, setShowDetailedResults] = useState(false); // ✅ Rätt plats
   const { token } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/ai_quiz_app/login');
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     if (!showResults || !token) return;
@@ -508,6 +516,16 @@ const QuizApp = () => {
                 >
                   <RotateCcw className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" />
                   Gör Om Quiz
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="group bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 9.75L12 3l9 6.75V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V9.75z" />
+                    <path d="M9 22V12h6v10" />
+                  </svg>
+                  Hem
                 </button>
               </div>
             </div>

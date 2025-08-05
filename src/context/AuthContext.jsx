@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (newToken) => {
+    if (newToken === auth.token) return;
     const user = jwtDecode(newToken);
     console.log('Decoded user from new token:', user);
     localStorage.setItem('token', newToken);

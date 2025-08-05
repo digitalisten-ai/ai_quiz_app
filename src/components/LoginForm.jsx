@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 
@@ -26,7 +26,7 @@ const LoginForm = ({ onLoginSuccess }) => {
 
       login(data.token);
       onLoginSuccess?.(data);
-      navigate('/dashboard'); // Uppdatera sökvägen om du vill gå till en annan sida
+      navigate('dashboard'); // Uppdatera sökvägen om du vill gå till en annan sida
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,9 +74,9 @@ const LoginForm = ({ onLoginSuccess }) => {
           </button>
           <p className="text-sm text-center text-gray-600">
             Har du inget konto?{' '}
-            <a href="/register" className="text-purple-600 hover:underline font-semibold">
+            <Link to="register" className="text-purple-600 hover:underline font-semibold">
               Skapa ett konto
-            </a>
+            </Link>
           </p>
         </form>
       </div>
