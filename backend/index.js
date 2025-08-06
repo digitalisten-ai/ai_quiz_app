@@ -17,6 +17,11 @@ app.get('/', (req, res) => {
   res.json({ message: '✅ This is the ACTIVE server instance!' });
 });
 
+// Render health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ message: '✅ API is healthy!' });
+});
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.log('❌ MongoDB connection error:', err));
