@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
+import { API_ENDPOINTS, apiFetch } from '../utils/api';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -13,22 +14,40 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // guard against double submit
     setError('');
     setLoading(true);
-    try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Något gick fel');
 
-      login(data.token);
+    try {
+      const data = await apiFetch(API_ENDPOINTS.login, {
+        method: 'POST',
+        body: { email, password }
+      });
+
+      if (!data?.token) {
+        throw Object.assign(new Error('Inloggningen lyckades inte: saknar token i svaret.'), { status: 500 });
+      }
+
+      // Spara token via AuthContext
+      await Promise.resolve(login(data.token));
+
+      // Event-hook för överordnad komponent (om skickad)
       onLoginSuccess?.(data);
-      navigate('dashboard'); // Uppdatera sökvägen om du vill gå till en annan sida
+
+      // Navigera till dashboard (basename i BrowserRouter tar hand om prefix)
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.message);
+      // Visa mer användarvänliga felmeddelanden
+      if (err?.status === 400 || err?.status === 401) {
+        setError('Fel e‑post eller lösenord. Försök igen.');
+      } else if (err?.status === 429) {
+        setError('För många försök. Vänta en stund och försök igen.');
+      } else if (err?.message?.includes('Failed to fetch')) {
+        setError('Kunde inte nå servern. Kontrollera din internetanslutning.');
+      } else {
+        setError(err?.message || 'Något gick fel. Försök igen senare.');
+      }
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -68,13 +87,14 @@ const LoginForm = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={loading}
+            aria-busy={loading}
             className={`w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'Loggar in...' : 'Logga in'}
           </button>
           <p className="text-sm text-center text-gray-600">
             Har du inget konto?{' '}
-            <Link to="register" className="text-purple-600 hover:underline font-semibold">
+            <Link to="/register" className="text-purple-600 hover:underline font-semibold">
               Skapa ett konto
             </Link>
           </p>

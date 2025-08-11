@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Logo from './Logo';
-import logo from "../assets/ai_quiz_logo.png";
+import { apiFetch, API_ENDPOINTS } from '../utils/api';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -16,16 +16,16 @@ const RegisterForm = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const payload = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      };
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Registreringen misslyckades');
-      }
+      await apiFetch(API_ENDPOINTS.register, {
+        method: 'POST',
+        body: payload,
+      });
 
       navigate('/dashboard');
     } catch (err) {
@@ -85,7 +85,10 @@ const RegisterForm = () => {
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
-          Har du redan ett konto? <a href="/login" className="text-purple-600 hover:underline">Logga in här</a>
+          Har du redan ett konto?{" "}
+          <Link to="/login" className="text-purple-600 hover:underline">
+            Logga in här
+          </Link>
         </p>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Logo from './Logo';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_ENDPOINTS, apiFetch } from '../utils/api';
 
 const ResultsPage = () => {
   const [results, setResults] = useState([]);
@@ -12,15 +12,22 @@ const ResultsPage = () => {
 useEffect(() => {
   if (token === undefined) return; // wait for token to resolve
   if (!token) navigate('/login');
-}, [token]);
+}, [token, navigate]);
 
   useEffect(() => {
     if (!token) return;
-    axios.get("http://localhost:5000/api/results", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setResults(res.data))
-    .catch(err => console.error(err));
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await apiFetch(API_ENDPOINTS.results, { token });
+        if (!cancelled) setResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Kunde inte hämta resultat:', err);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [token]);
 
   return (
@@ -57,7 +64,7 @@ useEffect(() => {
             <div className="bg-white-700/50 border border-black-400 rounded-xl p-4 shadow-md text-black text-center max-w-[150px] mx-auto">
               <p className="text-lg font-semibold">⏱️ Total tid</p>
               <p className="text-xl">
-                {results.length > 0 ? Math.round(results.reduce((acc, r) => acc + r.timeSpent, 0) / 60) + " min" : "–"}
+                {results.length > 0 ? Math.round(results.reduce((acc, r) => acc + (r.timeSpent || 0), 0) / 60) + " min" : "–"}
               </p>
             </div>
             <div className="bg-white-700/50 border border-black-400 rounded-xl p-4 shadow-md text-black text-center max-w-[150px] mx-auto">
@@ -65,8 +72,8 @@ useEffect(() => {
               <p className="text-xl">
                 {results.length > 0
                   ? (
-                      results.reduce((acc, r) => acc + r.score, 0) /
-                      results.reduce((acc, r) => acc + r.totalQuestions, 0)
+                      results.reduce((acc, r) => acc + (r.score || 0), 0) /
+                      Math.max(1, results.reduce((acc, r) => acc + (r.totalQuestions || 0), 0))
                     ).toFixed(2)
                   : "–"}
               </p>

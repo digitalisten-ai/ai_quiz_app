@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, RotateCcw, Trophy, Brain, Target, BookOpen, Clock, Award, CheckCircle, XCircle, Star } from 'lucide-react';
+import { apiFetch, API_ENDPOINTS } from '../utils/api';
 
 const QuizApp = () => {
   const [currentTest, setCurrentTest] = useState(0);
@@ -17,7 +18,7 @@ const QuizApp = () => {
 
   useEffect(() => {
     if (!token) {
-      navigate('/ai_quiz_app/login');
+      navigate('/login');
     }
   }, [token, navigate]);
 
@@ -26,23 +27,19 @@ const QuizApp = () => {
     const score = calculateScore();
     const saveResult = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/results', {
+        const data = await apiFetch(API_ENDPOINTS.results, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+          authToken: token,
+          body: {
             score: score.totalScore,
             maxScore: score.maxScore,
             percentage: score.percentage,
             timeSpent,
             correctAnswers: score.correctAnswers,
             totalQuestions: score.totalQuestions,
-            detailed: [] // Lägg till detaljer senare om önskas
-          })
+            detailed: []
+          }
         });
-        const data = await response.json();
         console.log('✅ Resultat sparat:', data);
       } catch (error) {
         console.error('❌ Kunde inte spara resultat:', error);

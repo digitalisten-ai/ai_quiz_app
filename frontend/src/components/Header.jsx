@@ -9,7 +9,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/ai_quiz_app/login");
+    navigate("/login");
   };
 
   return (

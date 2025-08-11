@@ -6,6 +6,7 @@ import RegisterForm from './components/RegisterForm';
 import QuizApp from './components/QuizApp';
 import Dashboard from './components/Dashboard';
 import ResultsPage from './components/ResultsPage';
+import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -15,12 +16,12 @@ function App() {
     <>
       <Header />
       <Routes>
-        <Route path="/ai_quiz_app/login" element={<LoginForm />} />
-        <Route path="/ai_quiz_app/dashboard" element={token ? <Dashboard /> : <Navigate to="/ai_quiz_app/login" />} />
-        <Route path="/ai_quiz_app/quiz" element={token ? <QuizApp /> : <Navigate to="/ai_quiz_app/login" />} />
-        <Route path="/ai_quiz_app/results" element={token ? <ResultsPage /> : <Navigate to="/ai_quiz_app/login" />} />
-        <Route path="/ai_quiz_app/register" element={<RegisterForm />} />
-        <Route path="*" element={<Navigate to={token ? "/ai_quiz_app/dashboard" : "/ai_quiz_app/login"} />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/quiz" element={token ? <QuizApp /> : <Navigate to="/login" />} />
+        <Route path="/results" element={token ? <ResultsPage /> : <Navigate to="/login" />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
